@@ -56,7 +56,7 @@ async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     """Download a video from twitter."""
     message_text = update.message.text
 
-    pattern = r'^https://twitter.com/\w+/status/(\d+)$'
+    pattern = r'https:\/\/(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)'
     match = re.match(pattern, message_text)
     if match:
         tweet_id = match.groups()[0]

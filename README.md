@@ -1,8 +1,8 @@
-Twitter Video Downloader Bot
-Description
+# Twitter Video Downloader Bot
+## Description
 This project is a Telegram bot that allows users to download videos from Twitter. The bot is built using Python and the Telegram library.
 
-Requirements
+## Requirements
 Python 3.x
 Telegram Library
 twitter_video_dl Library
@@ -11,35 +11,37 @@ Clone this repository.
 
 Install the dependencies using pip:
 
-bash
-Copy code
+```
 pip install -r requirements.txt
+```
 Configure the environment variables in config/settings.py.
 
-python
-Copy code
+```
 TOKEN = "your_telegram_token"
-Usage
+```
+## Usage
 Run the bot:
 
-bash
-Copy code
+```
 python main.py
+```
 Send the /start command to initiate the bot.
 
 Use the /help command for usage instructions.
 
 Paste the tweet link to download the video.
 
-Available Commands
+### Available Commands
 /start: Initiates the bot and displays your user ID.
 /help: Displays a help message.
-Functions
+
+## Functions
 start(update, context): Handles the /start command.
 help_command(update, context): Handles the /help command.
 download_video(update, context): Downloads a video from Twitter.
-Contributing
+
+## Contributing
 If you have any ideas or improvements, feel free to make a Pull Request or open an Issue.
 
-License
+## License
 This project is under the MIT License.
