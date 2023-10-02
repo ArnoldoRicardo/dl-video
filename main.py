@@ -56,15 +56,16 @@ async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     """Download a video from twitter."""
     message_text = update.message.text
 
-    pattern = r'https:\/\/(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)'
+    pattern = r'https:\/\/(twitter|x)\.com\/\w+\/status\/(\d+)'
     match = re.match(pattern, message_text)
     if match:
-        tweet_id = match.groups()[0]
+        plataform, tweet_id = match.groups()
         filename = f"video_{tweet_id}.mp4"
 
         if not os.path.exists(filename):
+            url = match.string.replace(plataform, 'twitter')
             try:
-                tvdl.download_video(match.string, filename)
+                tvdl.download_video(url, filename)
             except Exception as e:
                 logger.error(f"Error downloading video: {e}")
                 await update.message.reply_text("Error descargando el video.")
