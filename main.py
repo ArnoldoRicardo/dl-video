@@ -7,7 +7,7 @@ from telegram.ext import (Application, CommandHandler, ContextTypes,
                           MessageHandler, filters)
 
 import twitter_video_dl.twitter_video_dl as tvdl
-from config import settings
+from src.config import settings
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
