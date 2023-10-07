@@ -6,6 +6,8 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import src.twitter_video_dl.twitter_video_dl as tvdl
+from src.db import create_or_update_chat, create_or_update_user
+from src.schemas import ChatModel, UserModel
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -59,22 +61,23 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
     user = update.effective_user
     chat = update.effective_chat
-    user_id = user.id
-    user_name = user.full_name
-    username = user.username
-    is_bot = user.is_bot
 
-    chat_type = chat.type
-    chat_id = chat.id
-    chat_title = chat.title if chat.type != "private" else "Private Chat"
+    user = UserModel(
+        id=user.id,
+        full_name=user.full_name,
+        username=user.username,
+        is_bot=user.is_bot,
+        language_code=user.language_code
+    )
 
-    print(f"User ID: {user_id}")
-    print(f"Full Name: {user_name}")
-    print(f"Username: @{username}")
-    print(f"Is Bot: {is_bot}")
-    print(f"Chat Type: {chat_type}")
-    print(f"Chat ID: {chat_id}")
-    print(f"Chat Title: {chat_title}")
-    __import__('ipdb').set_trace()
+    chat = ChatModel(
+        id=chat.id,
+        type=chat.type,
+        title=chat.title if chat.type != "private" else "Private Chat",
+        user_id=user.id
+    )
 
-    await update.message.reply_text(f"Hola {user_name}! Tu ID es {user_id}.")
+    create_or_update_user(user)
+    create_or_update_chat(chat)
+
+    await update.message.reply_text(f"Hola {user.username}! Tu ID es {user.id}.")
