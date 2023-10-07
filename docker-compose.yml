@@ -1,12 +1,16 @@
 version: "3.1"
 
 services:
+  bot:
+    image: bot
+    build: .
+    volumes:
+      - .:/app
   mongo:
     image: mongo:latest
     container_name: my_mongo_container
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+    env_file:
+      - .env
     ports:
       - "27017:27017"
     volumes:
