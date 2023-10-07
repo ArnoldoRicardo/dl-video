@@ -2,6 +2,8 @@
 ## Description
 This project is a Telegram bot that allows users to download videos from Twitter. The bot is built using Python and the Telegram library.
 
+https://github.com/inteoryx/twitter-video-dl
+
 ## Requirements
 Python 3.x
 Telegram Library
