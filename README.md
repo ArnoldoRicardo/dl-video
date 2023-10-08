@@ -47,3 +47,13 @@ If you have any ideas or improvements, feel free to make a Pull Request or open 
 
 ## License
 This project is under the MIT License.
+
+## sync
+
+rsync -av -e "ssh -i ~/dev/sintrafico/keys/qa-environments.pem" --exclude '*.pyc' --exclude '.venv/' dl-video/ ubuntu@54.146.208.106:~
+
+## backups
+
+docker exec -it my_mongo_container mongodump --uri="mongodb://root:example@localhost:27017/dl-video-bot?authSource=admin" --out=/backup/
+
+docker exec -it my_mongo_container mongorestore --uri="mongodb://root:example@localhost:27017/dl-video-bot?authSource=admin" --dir=/backup/dl-video-bot
