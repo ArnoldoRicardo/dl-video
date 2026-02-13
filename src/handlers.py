@@ -4,8 +4,9 @@ import re
 
 from telegram import Update
 from telegram.ext import ContextTypes
+from yt_dlp.utils import DownloadError, ExtractorError
 
-import src.twitter_video_dl.twitter_video_dl as tvdl
+from src.downloader import download_video as dl_video
 from src.db import create_or_update_chat, create_or_update_user
 from src.schemas import ChatModel, UserModel
 
@@ -39,12 +40,15 @@ async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         filename = f"video_{tweet_id}.mp4"
 
         if not os.path.exists(filename):
-            url = match.string.replace(plataform, 'twitter')
             try:
-                tvdl.download_video(url, filename)
-            except Exception as e:
+                dl_video(message_text, filename)
+            except (DownloadError, ExtractorError) as e:
                 logger.error(f"Error downloading video: {e}")
                 await update.message.reply_text("Error descargando el video.")
+                return
+            except Exception as e:
+                logger.error(f"Unexpected error downloading video: {e}")
+                await update.message.reply_text("Error inesperado descargando el video.")
                 return
 
         bot = context.bot

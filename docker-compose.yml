@@ -6,6 +6,8 @@ services:
     build: .
     volumes:
       - .:/app
+    environment:
+      - MONGO_HOST=mongo
   mongo:
     image: mongo:latest
     container_name: my_mongo_container
@@ -15,6 +17,7 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+      - ./backup:/backup
 
 volumes:
   mongo_data:

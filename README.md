@@ -47,3 +47,10 @@ If you have any ideas or improvements, feel free to make a Pull Request or open 
 
 ## License
 This project is under the MIT License.
+
+
+# sync 
+
+```
+rsync -av -e "ssh -i ~/dev/sintrafico/keys/qa-environments.pem" --exclude '*.pyc' --exclude '.venv/' --exclude '.git/' --exclude '__pycache__/' dl-video/ ubuntu@54.146.208.106:~
+```
