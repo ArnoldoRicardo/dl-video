@@ -14,8 +14,19 @@ DEFAULT_OPTS = {
     'merge_output_format': 'mp4',
     'quiet': True,
     'no_warnings': True,
-    'max_filesize': MAX_FILE_SIZE,
 }
+
+
+class FileTooLargeError(Exception):
+    """Raised when the downloaded file exceeds the Telegram size limit."""
+
+    def __init__(self, file_size: int, max_size: int = MAX_FILE_SIZE):
+        self.file_size = file_size
+        self.max_size = max_size
+        super().__init__(
+            f"File size {file_size / 1024 / 1024:.1f}MB exceeds "
+            f"limit of {max_size / 1024 / 1024:.0f}MB"
+        )
 
 
 def download_video(url: str, output_filename: str) -> str:
@@ -31,6 +42,7 @@ def download_video(url: str, output_filename: str) -> str:
     Raises:
         DownloadError: If the video cannot be downloaded.
         ExtractorError: If the video metadata cannot be extracted.
+        FileTooLargeError: If the downloaded file exceeds MAX_FILE_SIZE.
     """
     opts = {
         **DEFAULT_OPTS,
@@ -47,26 +59,8 @@ def download_video(url: str, output_filename: str) -> str:
     file_size = os.path.getsize(output_filename)
     logger.info(f"Downloaded {output_filename} ({file_size / 1024 / 1024:.1f} MB)")
 
+    if file_size > MAX_FILE_SIZE:
+        os.remove(output_filename)
+        raise FileTooLargeError(file_size)
+
     return output_filename
-
-
-def get_video_info(url: str) -> dict | None:
-    """Extract video metadata without downloading.
-
-    Args:
-        url: The URL of the tweet/post containing the video.
-
-    Returns:
-        A dict with video info or None if extraction fails.
-    """
-    opts = {
-        **DEFAULT_OPTS,
-    }
-
-    try:
-        with yt_dlp.YoutubeDL(opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            return info
-    except (DownloadError, ExtractorError) as e:
-        logger.error(f"Failed to extract video info: {e}")
-        return None

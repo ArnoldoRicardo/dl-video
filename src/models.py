@@ -18,7 +18,6 @@ class User(Base):
     full_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     is_bot: Mapped[bool] = mapped_column(default=False)
     language_code: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    tier: Mapped[str] = mapped_column(String, default="free")
     created_at: Mapped[datetime] = mapped_column(default=func.now())
 
     subscriptions: Mapped[List["Subscription"]] = relationship(
@@ -29,7 +28,7 @@ class User(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<User(telegram_id={self.telegram_id}, username={self.username}, tier={self.tier})>"
+        return f"<User(telegram_id={self.telegram_id}, username={self.username})>"
 
 
 class Subscription(Base):

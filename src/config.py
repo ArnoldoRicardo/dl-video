@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     PREMIUM_PRICE_STARS: int = 250
     PREMIUM_DURATION_DAYS: int = 30
 
+    # Concurrency limits
+    MAX_CONCURRENT_DOWNLOADS: int = 5
+    MAX_DOWNLOADS_PER_USER: int = 1
+
     class Config:
         env_file = ".env"
         extra = "ignore"

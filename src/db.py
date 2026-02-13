@@ -1,7 +1,7 @@
 import logging
 from datetime import date, datetime, timedelta
 
-from sqlalchemy import event, func, select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from src.config import settings
@@ -47,7 +47,6 @@ async def get_or_create_user(
         await session.refresh(user)
         logger.info(f"Created new user: {user}")
     else:
-        # Update fields if they changed
         user.username = username
         user.full_name = full_name
         user.language_code = language_code
@@ -65,6 +64,43 @@ async def count_downloads_today(session: AsyncSession, user_id: int) -> int:
     )
     result = await session.execute(stmt)
     return result.scalar() or 0
+
+
+async def reserve_download(
+    session: AsyncSession, user_id: int, tweet_url: str, daily_limit: int
+) -> Download | None:
+    """Atomically check the daily limit and record a download.
+
+    Returns the Download record if the user is within limits, or None
+    if the daily limit has been reached.  This prevents race conditions
+    where concurrent requests all pass the limit check.
+    """
+    today = date.today()
+    stmt = select(func.count(Download.id)).where(
+        Download.user_id == user_id,
+        func.date(Download.created_at) == today,
+    )
+    result = await session.execute(stmt)
+    count = result.scalar() or 0
+
+    if count >= daily_limit:
+        return None
+
+    download = Download(user_id=user_id, tweet_url=tweet_url)
+    session.add(download)
+    await session.commit()
+    await session.refresh(download)
+    return download
+
+
+async def delete_download(session: AsyncSession, download_id: int) -> None:
+    """Delete a download record (used when download fails after reservation)."""
+    stmt = select(Download).where(Download.id == download_id)
+    result = await session.execute(stmt)
+    download = result.scalar_one_or_none()
+    if download:
+        await session.delete(download)
+        await session.commit()
 
 
 async def has_active_subscription(session: AsyncSession, user_id: int) -> bool:
@@ -117,13 +153,6 @@ async def create_subscription(
         telegram_charge_id=telegram_charge_id,
     )
     session.add(subscription)
-
-    # Update user tier
-    stmt = select(User).where(User.id == user_id)
-    result = await session.execute(stmt)
-    user = result.scalar_one()
-    user.tier = "premium"
-
     await session.commit()
     await session.refresh(subscription)
     logger.info(f"Created subscription for user {user_id}: {subscription}")
@@ -133,7 +162,7 @@ async def create_subscription(
 async def record_download(
     session: AsyncSession, user_id: int, tweet_url: str
 ) -> Download:
-    """Record a video download."""
+    """Record a video download (for premium users who skip reservation)."""
     download = Download(user_id=user_id, tweet_url=tweet_url)
     session.add(download)
     await session.commit()
