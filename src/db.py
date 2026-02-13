@@ -1,7 +1,7 @@
 import logging
 from datetime import date, datetime, timedelta
 
-from sqlalchemy import event, func, select
+from sqlalchemy import event, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from src.config import settings
@@ -13,17 +13,10 @@ engine = create_async_engine(settings.DATABASE_URL, echo=False)
 async_session = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 
-@event.listens_for(engine.sync_engine, "connect")
-def set_sqlite_pragma(dbapi_conn, connection_record):
-    """Enable WAL mode for better concurrent read performance."""
-    cursor = dbapi_conn.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL")
-    cursor.close()
-
-
 async def init_db():
-    """Create all tables if they don't exist."""
+    """Create all tables and configure SQLite pragmas."""
     async with engine.begin() as conn:
+        await conn.execute(text("PRAGMA journal_mode=WAL"))
         await conn.run_sync(Base.metadata.create_all)
     logger.info("Database initialized")
 
