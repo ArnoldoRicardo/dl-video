@@ -1,23 +1,8 @@
-version: "3.1"
-
 services:
   bot:
-    image: bot
     build: .
     volumes:
-      - .:/app
-    environment:
-      - MONGO_HOST=mongo
-  mongo:
-    image: mongo:latest
-    container_name: my_mongo_container
+      - ./data:/app/data
     env_file:
       - .env
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-      - ./backup:/backup
-
-volumes:
-  mongo_data:
+    restart: unless-stopped

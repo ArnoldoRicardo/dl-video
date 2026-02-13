@@ -1,16 +1,14 @@
+from datetime import datetime
+from typing import Optional
+
 from pydantic import BaseModel
 
 
-class UserModel(BaseModel):
-    id: int
-    full_name: str
-    username: str
-    is_bot: bool
-    language_code: str
-
-
-class ChatModel(BaseModel):
-    id: int
-    type: str
-    title: str
-    user_id: int
+class UserInfo(BaseModel):
+    telegram_id: int
+    username: Optional[str] = None
+    full_name: Optional[str] = None
+    tier: str = "free"
+    downloads_today: int = 0
+    daily_limit: int = 3
+    subscription_expires: Optional[datetime] = None
