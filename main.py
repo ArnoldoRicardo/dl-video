@@ -1,3 +1,5 @@
+import logging
+
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -18,6 +20,11 @@ from src.handlers import (
     subscribe_command,
     successful_payment_handler,
 )
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 async def post_init(application: Application) -> None:

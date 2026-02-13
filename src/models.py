@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List, Optional
 
 from sqlalchemy import BigInteger, ForeignKey, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -14,16 +13,16 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
-    username: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    full_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    username: Mapped[str | None] = mapped_column(String, nullable=True)
+    full_name: Mapped[str | None] = mapped_column(String, nullable=True)
     is_bot: Mapped[bool] = mapped_column(default=False)
-    language_code: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    language_code: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(default=func.now())
 
-    subscriptions: Mapped[List["Subscription"]] = relationship(
+    subscriptions: Mapped[list["Subscription"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
-    downloads: Mapped[List["Download"]] = relationship(
+    downloads: Mapped[list["Download"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
 

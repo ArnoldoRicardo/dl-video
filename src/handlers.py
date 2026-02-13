@@ -24,11 +24,6 @@ from src.db import (
 )
 from src.downloader import FileTooLargeError, download_video as dl_video
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
-logging.getLogger("httpx").setLevel(logging.WARNING)
-
 logger = logging.getLogger(__name__)
 
 TWITTER_URL_PATTERN = re.compile(
@@ -39,12 +34,21 @@ TWITTER_URL_PATTERN = re.compile(
 _download_semaphore = asyncio.Semaphore(settings.MAX_CONCURRENT_DOWNLOADS)
 
 # Fix 6: Per-user locks — one download at a time per user
+# Use OrderedDict to auto-evict old entries and prevent memory leak
 _user_locks: dict[int, asyncio.Lock] = {}
+_MAX_USER_LOCKS = 1000
 
 
 def _get_user_lock(user_id: int) -> asyncio.Lock:
-    """Get or create a per-user lock."""
+    """Get or create a per-user lock. Evicts old entries if over limit."""
     if user_id not in _user_locks:
+        # Evict oldest unlocked entries if we're over the limit
+        if len(_user_locks) >= _MAX_USER_LOCKS:
+            to_remove = [
+                uid for uid, lock in _user_locks.items() if not lock.locked()
+            ]
+            for uid in to_remove[:len(to_remove) // 2]:
+                del _user_locks[uid]
         _user_locks[user_id] = asyncio.Lock()
     return _user_locks[user_id]
 
@@ -249,7 +253,7 @@ async def _process_download(update, context, tg_user, tweet_url, tweet_id):
     try:
         # Fix 1 + 7: Non-blocking download with global semaphore
         async with _download_semaphore:
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             await loop.run_in_executor(None, dl_video, tweet_url, filename)
 
     except FileTooLargeError as e:
@@ -325,5 +329,8 @@ async def _process_download(update, context, tg_user, tweet_url, tweet_id):
 
     # Record download for premium users (free users already reserved above)
     if is_premium:
-        async with async_session() as session:
-            await record_download(session, user.id, tweet_url)
+        try:
+            async with async_session() as session:
+                await record_download(session, user.id, tweet_url)
+        except Exception as e:
+            logger.error(f"Failed to record download: user_id={tg_user.id} err={e}")

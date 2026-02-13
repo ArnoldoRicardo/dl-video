@@ -1,56 +1,103 @@
-# Twitter Video Downloader Bot
-## Description
-This project is a Telegram bot that allows users to download videos from Twitter. The bot is built using Python and the Telegram library.
+# dl-video - Twitter/X Video Downloader Bot
 
-https://github.com/inteoryx/twitter-video-dl
+Telegram bot that downloads videos from Twitter/X and sends them directly to users. Features a freemium model with Telegram Stars payments.
+
+## Features
+
+- Download videos from Twitter/X by pasting a tweet link
+- Free tier: 3 downloads per day
+- Premium tier: unlimited downloads (250 Stars/month)
+- Payments via Telegram Stars (native, no external payment provider needed)
+- Lightweight SQLite database (no external DB server required)
+- Auto-cleanup of downloaded files after sending
+- Concurrent download management (global + per-user limits)
 
 ## Requirements
-Python 3.x
-Telegram Library
-twitter_video_dl Library
-Setup
-Clone this repository.
 
-Install the dependencies using pip:
+- Python 3.11+
+- ffmpeg (for video processing)
 
+## Setup
+
+1. Clone this repository:
+```bash
+git clone <repo-url>
+cd dl-video
 ```
+
+2. Install dependencies:
+```bash
 pip install -r requirements.txt
 ```
-Configure the environment variables in config/settings.py.
 
+3. Create a `.env` file (see `.env.example`):
+```bash
+cp .env.example .env
+# Edit .env with your Telegram bot token
 ```
-TOKEN = "your_telegram_token"
-```
-## Usage
-Run the bot:
 
-```
+4. Run the bot:
+```bash
 python main.py
 ```
-Send the /start command to initiate the bot.
 
-Use the /help command for usage instructions.
+## Docker
 
-Paste the tweet link to download the video.
+```bash
+docker-compose up --build
+```
 
-### Available Commands
-/start: Initiates the bot and displays your user ID.
-/help: Displays a help message.
+The SQLite database is persisted in `./data/bot.db` via a Docker volume.
 
-## Functions
-start(update, context): Handles the /start command.
-help_command(update, context): Handles the /help command.
-download_video(update, context): Downloads a video from Twitter.
+## Bot Commands
 
-## Contributing
-If you have any ideas or improvements, feel free to make a Pull Request or open an Issue.
+| Command | Description |
+|---------|-------------|
+| `/start` | Register and get a welcome message |
+| `/help` | Show available commands |
+| `/status` | Check your plan, downloads remaining, subscription expiry |
+| `/subscribe` | Purchase premium with Telegram Stars |
+
+To download a video, just paste a Twitter/X link in the chat.
+
+## Configuration
+
+All configuration is done via environment variables (see `.env.example`):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TOKEN` | - | Telegram bot token (required) |
+| `DATABASE_URL` | `sqlite+aiosqlite:///data/bot.db` | Database connection string |
+| `FREE_DAILY_LIMIT` | `3` | Max downloads/day for free users |
+| `PREMIUM_PRICE_STARS` | `250` | Price in Telegram Stars for premium |
+| `PREMIUM_DURATION_DAYS` | `30` | Duration of premium subscription |
+| `MAX_CONCURRENT_DOWNLOADS` | `5` | Global max concurrent downloads |
+
+## Project Structure
+
+```
+dl-video/
+├── main.py              # Bot entry point
+├── src/
+│   ├── config.py        # Settings (env vars)
+│   ├── models.py        # SQLAlchemy ORM models
+│   ├── db.py            # Database operations
+│   ├── handlers.py      # Telegram command/message handlers
+│   └── downloader.py    # yt-dlp video download wrapper
+├── data/                # SQLite database (gitignored)
+├── Dockerfile
+├── docker-compose.yml
+└── requirements.txt
+```
+
+## Tech Stack
+
+- **python-telegram-bot** 22.6 (async, Stars support)
+- **yt-dlp** (video downloading)
+- **SQLAlchemy** 2.0 + aiosqlite (async SQLite)
+- **Pydantic** (settings management)
+- **Docker** (deployment)
 
 ## License
-This project is under the MIT License.
 
-
-# sync 
-
-```
-rsync -av -e "ssh -i ~/dev/sintrafico/keys/qa-environments.pem" --exclude '*.pyc' --exclude '.venv/' --exclude '.git/' --exclude '__pycache__/' dl-video/ ubuntu@54.146.208.106:~
-```
+MIT

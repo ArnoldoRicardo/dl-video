@@ -9,6 +9,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p /app/data
+RUN mkdir -p /app/data && \
+    addgroup --system app && \
+    adduser --system --ingroup app app && \
+    chown -R app:app /app
+
+USER app
+
+HEALTHCHECK --interval=60s --timeout=10s --retries=3 \
+    CMD python -c "import asyncio; from src.config import settings; print('ok')" || exit 1
 
 CMD ["python", "main.py"]

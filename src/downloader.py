@@ -2,7 +2,7 @@ import logging
 import os
 
 import yt_dlp
-from yt_dlp.utils import DownloadError, ExtractorError
+from yt_dlp.utils import DownloadError
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,6 @@ def download_video(url: str, output_filename: str) -> str:
 
     Raises:
         DownloadError: If the video cannot be downloaded.
-        ExtractorError: If the video metadata cannot be extracted.
         FileTooLargeError: If the downloaded file exceeds MAX_FILE_SIZE.
     """
     opts = {

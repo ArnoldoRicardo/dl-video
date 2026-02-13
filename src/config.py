@@ -12,7 +12,6 @@ class Settings(BaseSettings):
 
     # Concurrency limits
     MAX_CONCURRENT_DOWNLOADS: int = 5
-    MAX_DOWNLOADS_PER_USER: int = 1
 
     class Config:
         env_file = ".env"

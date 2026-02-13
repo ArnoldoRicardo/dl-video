@@ -1,0 +1,9 @@
+.venv/
+.git/
+.env
+__pycache__/
+data/*.db
+data/*.db-*
+*.mp4
+test.py
+.gitignore
