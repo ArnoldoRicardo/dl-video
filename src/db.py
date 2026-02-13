@@ -1,5 +1,6 @@
 import logging
 from datetime import date, datetime, timedelta
+from pathlib import Path
 
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -15,6 +16,11 @@ async_session = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 async def init_db():
     """Create all tables and configure SQLite pragmas."""
+    # Ensure database directory exists
+    db_path = settings.DATABASE_URL.replace("sqlite+aiosqlite:///", "")
+    db_dir = Path(db_path).parent
+    db_dir.mkdir(parents=True, exist_ok=True)
+    
     async with engine.begin() as conn:
         await conn.execute(text("PRAGMA journal_mode=WAL"))
         await conn.run_sync(Base.metadata.create_all)

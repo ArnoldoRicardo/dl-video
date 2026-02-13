@@ -10,8 +10,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 RUN mkdir -p /app/data && \
-    addgroup --system app && \
-    adduser --system --ingroup app app && \
+    addgroup --gid 1000 app && \
+    adduser --uid 1000 --gid 1000 --disabled-password --gecos "" app && \
     chown -R app:app /app
 
 USER app
