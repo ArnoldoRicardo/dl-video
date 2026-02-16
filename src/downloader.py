@@ -14,6 +14,10 @@ DEFAULT_OPTS = {
     'merge_output_format': 'mp4',
     'quiet': True,
     'no_warnings': True,
+    # TODO: Workaround temporal para yt-dlp issue #15963 — Twitter GraphQL API
+    # devuelve "Dependency: Unspecified". Revertir cuando yt-dlp publique fix.
+    # https://github.com/yt-dlp/yt-dlp/issues/15963
+    'extractor_args': {'twitter': {'api': ['syndication']}},
 }
 
 
