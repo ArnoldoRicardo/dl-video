@@ -2,4 +2,4 @@ python-telegram-bot==22.6
 pydantic-settings==2.0.3
 sqlalchemy==2.0.39
 aiosqlite==0.22.1
-yt-dlp==2026.2.4
+yt-dlp==2026.2.21
